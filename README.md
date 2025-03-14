@@ -4,5 +4,5 @@
 
 
 要求keyboard maestro设置：
-1.kmtrigger://macro=us为切换到英文输入法
+1.kmtrigger://macro=us为切换到英文输入法  
 2.kmtrigger://macro=wubi为切换到中文输入法
