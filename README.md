@@ -13,3 +13,6 @@ You have to install https://github.com/CodeFalling/fcitx-remote-for-osx
 # Thanks
 
 This project is just a modified version of https://github.com/vim-scripts/fcitx.vim developed by [lilydjwg](https://github.com/lilydjwg)
+
+
+通过keyboard maestro的open kmtrigger://marco=xxx方式解决macOS切换中英文输入法需要切换到其他应用才能生效的bug
