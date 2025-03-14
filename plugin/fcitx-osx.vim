@@ -10,9 +10,7 @@ if exists('g:fcitx_remote')
   finish
 endif
 
-if &ttimeoutlen <= 0 || &ttimeoutlen > 50
-    set ttimeoutlen=50
-endif
+set ttimeoutlen=50
 
 if (has("win32") || has("win95") || has("win64") || has("win16"))
   " Windows 下不要载入
@@ -33,13 +31,17 @@ function Fcitx2en()
   let inputstatus = system("fcitx-remote")
   if inputstatus == 2
     let b:inputtoggle = 1
-    let t = system("fcitx-remote -c")
+    "let t = system("fcitx-remote -c") 
+    "注意这里不能用fcitx-remote -c来切换到英文,因为效果不好,经常只会在第一次由中文切换为英文时才可生效,后面再切换就不会生效了,由keyboard maestro切换到英文效果好
+    let t = system("open -g kmtrigger://macro=us")
+    
   endif
 endfunction
 function Fcitx2zh()
   try
     if b:inputtoggle == 1
-      let t = system("fcitx-remote -o")
+      "let t = system("fcitx-remote -o")
+      let t = system("open kmtrigger://macro=wubi")
       let b:inputtoggle = 0
     endif
   catch /inputtoggle/
@@ -59,6 +61,8 @@ function BindAu2zhOnce()
   augroup END
 endfunction
 
+
+
 function BindAu()
   augroup Fcitx
    au InsertLeave * call Fcitx2en()
@@ -72,16 +76,7 @@ function UnBindAu()
   au! Fcitx InsertEnter *
 endfunction
 
-"call once when enter insert mode instead of vim startup
-let g:called_bind = 0
-function EchoBind()
-    if (g:called_bind==0)
-        call BindAu()
-    endif
-    let g:called_bind =1
-endfunction
-
-autocmd InsertEnter * call EchoBind()
+call BindAu()
 
 "Called once right before you start selecting multiple cursors
 function! Multiple_cursors_before()
