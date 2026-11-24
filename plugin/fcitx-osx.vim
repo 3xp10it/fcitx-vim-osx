@@ -1,10 +1,16 @@
-" fcitx.vim  记住插入模式小企鹅输入法的状态
- " Author:       lilydjwg
-" Maintainer:   lilydjwg
-" Modified by:  codefalling
-" Note:         另有使用 Python3 接口的新版本
-" 此修改版用于 OS X 下的 https://github.com/CodeFalling/fcitx-remote-for-osx
- " ---------------------------------------------------------------------
+" fcitx.vim  记住插入/命令行模式下 macOS 输入法的状态（中文 <-> 英文）
+"
+" 上游:      lilydjwg/fcitx.vim (Linux fcitx)
+" macOS 适配: codefalling / xcodebuild/fcitx-remote-for-osx
+" 本 fork:   https://github.com/3xp10it/fcitx-vim-osx
+"
+" 本 fork 主要改动 (2026-11-24):
+"   1. 切输入法从 fcitx-remote -c/-o (toggle, 不可靠) 改为 -s <source-id> 幂等指定。
+"   2. 新增 CmdlineLeave 自动切回英文 (FcitxCmdline2en)，且不碰 b:inputtoggle。
+"
+" 重要: 依赖 fcitx-remote-for-osx 的 SPECIFIC 版 (build.py build macos-wubi us)。
+"       GENERAL 版的 -s 仍是 Ctrl+Shift+Z toggle, 本插件将不可靠。详见 README.md。
+" ---------------------------------------------------------------------
 " Load Once:
 if exists('g:fcitx_remote')
   finish
