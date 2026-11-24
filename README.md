@@ -18,7 +18,7 @@
 
 需要 `fcitx-remote-for-osx` 的 **SPECIFIC** 版本（不是 GENERAL 版）。
 
- GENERAL 版的 `-c` / `-o` / `-s` 全部走 Ctrl+Shift+Z 热键；只有 SPECIFIC 版的 `-s` 才走 TIS API 按 ID 精确选中，插件才可靠。
+**GENERAL 版**的 `-c` / `-o` / `-s` 全部走 Ctrl+Shift+Z 热键；只有 **SPECIFIC 版**的 `-s` 才走 TIS API 按 ID 精确选中，插件才可靠。
 
 编译 SPECIFIC 版（以 macOS 自带五笔 + 美式键盘为例）：
 
