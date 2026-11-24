@@ -82,6 +82,10 @@ call BindAu()
 " 用独立的 augroup FcitxCmdline，不会被上面 UnBindAu()（只清 Fcitx 组的
 " InsertLeave/InsertEnter）影响。
 function! FcitxCmdline2en()
+  " 设计要点：本函数只切输入源，绝不读写 b:inputtoggle。
+  " b:inputtoggle 由 Fcitx2en/Fcitx2zh 维护，记录「上次离开插入模式时是否为中文」。
+  " 若这里碰了它，cmdline 搜索就会污染插入模式的输入法记忆：
+  " 下次按 i 时应按进入 cmdline 之前的 b:inputtoggle 决定恢复哪种输入法。
   " 以下 CmdlineLeave 不是「用户确认搜索/命令」，跳过，避免误切输入法：
   "   '='   : auto-pairs 的 <BS> 映射 <C-R>=AutoPairsDelete()<CR> 表达式求值
   "   '/' '?' : incsearch 增量搜索每输入一个字符都会 feedkeys('/xxx<CR>') 产生假 leave；
