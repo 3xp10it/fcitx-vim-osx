@@ -19,7 +19,7 @@ endif
 if exists('$SSH_TTY')
   finish
 endif
-if !executable("fcitx-remote")
+if !executable("/usr/local/bin/fcitx-remote")
   finish
 endif
 let s:keepcpo = &cpo
@@ -27,21 +27,20 @@ let g:loaded_fcitx = 1
 set cpo&vim
 " ---------------------------------------------------------------------
 " Functions:
+" 【改动 2026-11-24】改用 -s 按 ID 幂等指定输入源，替代原 -c/-o：
+" 原 -c/-o 在 macOS 版都是发 Ctrl+Shift+Z「切到上一个输入源」(toggle)，
+" 轮转历史一变就切错；-s 走 TIS API 按 ID 直接选中，实测连续调用结果不变。
 function Fcitx2en()
-  let inputstatus = system("fcitx-remote")
+  let inputstatus = system("/usr/local/bin/fcitx-remote")
   if inputstatus == 2
     let b:inputtoggle = 1
-    "let t = system("fcitx-remote -c") 
-    "注意这里不能用fcitx-remote -c来切换到英文,因为效果不好,经常只会在第一次由中文切换为英文时才可生效,后面再切换就不会生效了,由keyboard maestro切换到英文效果好
-    let t = system("open -g kmtrigger://macro=us")
-    
   endif
+  let t = system("/usr/local/bin/fcitx-remote -s com.apple.keylayout.US")
 endfunction
 function Fcitx2zh()
   try
     if b:inputtoggle == 1
-      "let t = system("fcitx-remote -o")
-      let t = system("open kmtrigger://macro=wubi")
+      let t = system("/usr/local/bin/fcitx-remote -s com.apple.inputmethod.SCIM.WBX")
       let b:inputtoggle = 0
     endif
   catch /inputtoggle/
@@ -61,8 +60,6 @@ function BindAu2zhOnce()
   augroup END
 endfunction
 
-
-
 function BindAu()
   augroup Fcitx
    au InsertLeave * call Fcitx2en()
@@ -77,6 +74,32 @@ function UnBindAu()
 endfunction
 
 call BindAu()
+
+" ============================================================
+" 【改动 2026-11-24】CmdlineLeave：命令行/搜索退出后自动切回英文。
+" 注意：本段位于文件开头的 $SSH_TTY / executable 检查之后，SSH 环境或
+" fcitx-remote 缺失时整份插件（含本段）都不加载。
+" 用独立的 augroup FcitxCmdline，不会被上面 UnBindAu()（只清 Fcitx 组的
+" InsertLeave/InsertEnter）影响。
+function! FcitxCmdline2en()
+  " 以下 CmdlineLeave 不是「用户确认搜索/命令」，跳过，避免误切输入法：
+  "   '='   : auto-pairs 的 <BS> 映射 <C-R>=AutoPairsDelete()<CR> 表达式求值
+  "   '/' '?' : incsearch 增量搜索每输入一个字符都会 feedkeys('/xxx<CR>') 产生假 leave；
+  "             若在此切英文，中文选字（如五笔按空格选字）会被误切。
+  " 用户真正按回车确认搜索后，incsearch 走 ':' 类型收尾(let &hlsearch)，仍会执行下方切换，
+  " 保留「/ 搜索后回车自动切英文」的行为。
+  if getcmdtype() ==# '=' || getcmdtype() ==# '/' || getcmdtype() ==# '?'
+    return
+  endif
+  " 回车确认搜索/命令后强制回英文。用 -s 按 ID 幂等指定 US（底层 TIS API）。
+  " 不用 -c：它发 Ctrl+Shift+Z 是「切到上一个输入源」toggle，轮转历史一变就切错。
+  call system('/usr/local/bin/fcitx-remote -s com.apple.keylayout.US')
+endfunction
+augroup FcitxCmdline
+  autocmd!
+  autocmd CmdlineLeave * call FcitxCmdline2en()
+augroup END
+" ============================================================
 
 "Called once right before you start selecting multiple cursors
 function! Multiple_cursors_before()
